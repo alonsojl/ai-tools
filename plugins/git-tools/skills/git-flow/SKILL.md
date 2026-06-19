@@ -128,7 +128,6 @@ No abortes sin avisar. Muestra `git status`, ofrece opciones: resolver manual / 
 Lee el archivo correspondiente solo cuando lo necesites:
 
 - **Hotfix**: `references/hotfix.md`
-- **Ejemplos end-to-end**: `references/examples.md`
 
 ## Interacción con el usuario
 
