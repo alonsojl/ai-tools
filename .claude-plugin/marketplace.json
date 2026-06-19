@@ -1,0 +1,30 @@
+{
+  "name": "alonsojl-marketplace",
+  "description": "Personal marketplace of agents and skills for Claude Code",
+  "owner": {
+    "name": "alonsojl",
+    "email": "ia.deftly810@slmails.com"
+  },
+  "plugins": [
+    {
+      "name": "golang-engineering",
+      "source": "./plugins/golang-engineering",
+      "description": "Agents and skills for Go software engineering",
+      "version": "0.1.0"
+    },
+    {
+      "name": "git-tools",
+      "source": "./plugins/git-tools",
+      "description": "Skills for git workflows: conventional commits and related tooling",
+      "version": "0.1.0"
+    },
+    {
+      "name": "cc-skills-golang",
+      "source": {
+        "source": "github",
+        "repo": "samber/cc-skills-golang"
+      },
+      "description": "AI Agent Skills for production-ready Go projects"
+    }
+  ]
+}

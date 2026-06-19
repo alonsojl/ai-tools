@@ -1,0 +1,8 @@
+{
+  "name": "git-tools",
+  "description": "Skills for git workflows: conventional commits and related tooling",
+  "version": "0.1.0",
+  "author": {
+    "name": "alonsojl"
+  }
+}

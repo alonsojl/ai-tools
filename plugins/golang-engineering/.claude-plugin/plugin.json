@@ -1,0 +1,8 @@
+{
+  "name": "golang-engineering",
+  "description": "Agents and skills for Go software engineering: code review, testing, concurrency, and language conventions",
+  "version": "0.1.0",
+  "author": {
+    "name": "alonsojl"
+  }
+}
