@@ -19,7 +19,7 @@ Prepara ramas para liberar tickets a desarrollo, sandbox y producción siguiendo
 | `feature_ts<NUM>` | Por ticket (multi-ticket: `feature_ts<NUM1>_ts<NUM2>`) |
 | `develop_ts<NUM>` | QA por ticket — se despliega a sandbox tras push del feature |
 | `release_<X.Y.Z>` | Release |
-| `hotfix_<X.Y.Z>` | Hotfix (sale de `develop`, no de `master`) |
+| `hotfix_<X.Y.Z>` | Hotfix — sale de `develop`, se nombra con el tag actual (versión con el problema) |
 
 ## Workflow
 
