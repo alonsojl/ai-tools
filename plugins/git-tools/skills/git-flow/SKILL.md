@@ -1,13 +1,14 @@
 ---
 name: git-flow
-description: Flujo Gitflow del equipo para releases, hotfixes y rollbacks.
+description: Flujo Gitflow del equipo para releases y hotfixes.
+allowed-tools: Bash
 ---
 
-Flujo Gitflow del equipo. Todos los merges usan `--no-ff`. Ejecuta **paso a paso, pidiendo confirmación al usuario antes de cada comando que modifique el repo o los remotos**.
+# Gitflow — Release y Hotfix
 
-## Interacción con el usuario
+## Overview
 
-Presenta decisiones como **opciones seleccionables** (Tab), nunca preguntas abiertas. Solo usa texto libre cuando la respuesta no pueda enumerarse (ej. número de ticket).
+Prepara ramas para liberar tickets a desarrollo, sandbox y producción siguiendo el flujo Gitflow del equipo. Todos los merges usan `--no-ff`. Ejecuta paso a paso, pidiendo confirmación antes de cada comando que modifique el repo o los remotos.
 
 ## Convenciones de ramas
 
@@ -20,42 +21,103 @@ Presenta decisiones como **opciones seleccionables** (Tab), nunca preguntas abie
 | `release_<X.Y.Z>` | Release |
 | `hotfix_<X.Y.Z>` | Hotfix (sale de `develop`, no de `master`) |
 
-## Antes de empezar
+## Workflow
 
-Recopila: **ticket(s)**, **otros features en el release**, **versión** (si no la da, propón en Paso 4).
+### 1. Tipo de preparación
 
-Valida repo limpio, remotos alcanzables, ramas `develop_ts<NUM>` existen:
+Pregunta al usuario con opciones seleccionables:
+
+| Opción | Develop branches | Alcance |
+|--------|-----------------|---------|
+| `[A — Feature único a sandbox]` | Una `develop_ts` | Pasos 2–4 (feature + push) |
+| `[B — Feature multi-ticket a sandbox]` | Varias `develop_ts` | Pasos 2–4 (feature + push) |
+| `[C — Feature único a producción]` | Una `develop_ts` | Pasos 2–8 (hasta master + tag) |
+| `[D — Feature multi-ticket a producción]` | Varias `develop_ts` | Pasos 2–8 (hasta master + tag) |
+
+Después obtén del usuario:
+
+- **Ticket(s)** a liberar (`ts176`, o `ts176 + ts177` para B/D)
+- **Versión** del release (solo C/D — si no la da, propón en el paso 6)
+
+### 2. Validar estado del repo
 
 ```bash
-git rev-parse --show-toplevel && git remote -v && git status --porcelain && git fetch --all --prune
+git rev-parse --show-toplevel
+git remote -v
+git status --porcelain
+git fetch --all --prune
 git branch -a | grep develop_ts<NUM>
 ```
 
 Si algo falla, **detente** y avisa al usuario.
 
-## Flujo principal
+### 3. Crear feature desde develop
 
-**Paso 1** — Crear feature desde develop:
-`git checkout develop && git pull origin develop && git checkout -b feature_ts<NUM>`
+```bash
+git checkout develop
+git pull origin develop
+git checkout -b feature_ts<NUM>
+```
 
-**Paso 2** — Integrar develop_ts al feature y pushear (deploy a sandbox):
-`git merge --no-ff develop_ts<NUM> && git push origin feature_ts<NUM>`
-Multi-ticket: mergea cada `develop_ts<NUM>` antes del push. **Pausa hasta que QA valide en sandbox.**
+Multi-ticket: usa `feature_ts<NUM1>_ts<NUM2>` en el orden que indique el usuario.
 
-**Paso 3** — Mergear feature(s) a develop (sin push aún):
-`git checkout develop && git merge --no-ff feature_ts<NUM>`
+### 4. Integrar develop_ts al feature y pushear
 
-**Paso 4** — Crear release (propón patch por defecto, confirma con usuario):
-`git tag -l --sort=-v:refname | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$' | head -1`
-`git checkout -b release_<X.Y.Z>`
+```bash
+git merge --no-ff develop_ts<NUM>
+git push origin feature_ts<NUM>
+```
 
-**Paso 5** — Mergear release a master:
-`git checkout master && git pull origin master && git merge --no-ff release_<X.Y.Z>`
+Multi-ticket (B/D): mergea cada `develop_ts<NUM>` antes del push. **Pausa hasta que QA valide en sandbox.**
 
-**Paso 6** — Tag y push (las tres referencias juntas):
-`git tag -a <X.Y.Z> -m "Merge branch 'release_<X.Y.Z>'" && git push origin develop master <X.Y.Z>`
+Opciones A/B: el flujo termina aquí. Opciones C/D: continúa al paso 5.
 
-**Paso 7** — Volver a develop: `git checkout develop`
+### 5. Mergear feature(s) a develop (solo C/D)
+
+```bash
+git checkout develop
+git merge --no-ff feature_ts<NUM>
+```
+
+No hagas push de `develop` todavía.
+
+### 6. Crear release (solo C/D)
+
+Obtén el último tag para calcular la siguiente versión:
+
+```bash
+git tag -l --sort=-v:refname | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$' | head -1
+```
+
+Regla de incremento (confirma con el usuario antes de crear la rama):
+
+| Último tag | Tipo | Siguiente versión |
+|------------|------|-------------------|
+| `1.0.0` | patch (por defecto) | `1.0.1` |
+| `1.0.0` | minor (funcionalidad nueva) | `1.1.0` |
+| `1.0.0` | major (breaking changes) | `2.0.0` |
+
+```bash
+git checkout -b release_<X.Y.Z>
+```
+
+### 7. Mergear release a master (solo C/D)
+
+```bash
+git checkout master
+git pull origin master
+git merge --no-ff release_<X.Y.Z>
+```
+
+### 8. Tag y push (solo C/D)
+
+```bash
+git tag -a <X.Y.Z> -m "Merge branch 'release_<X.Y.Z>'"
+git push origin develop master <X.Y.Z>
+git checkout develop
+```
+
+Las tres referencias (`develop`, `master`, tag) se suben en el mismo comando. Al terminar, dejar al usuario en `develop`.
 
 ## Conflictos de merge
 
@@ -66,9 +128,22 @@ No abortes sin avisar. Muestra `git status`, ofrece opciones: resolver manual / 
 Lee el archivo correspondiente solo cuando lo necesites:
 
 - **Hotfix**: `references/hotfix.md`
-- **Rollback**: `references/rollback.md`
 - **Ejemplos end-to-end**: `references/examples.md`
+
+## Interacción con el usuario
+
+Presenta decisiones como **opciones seleccionables** (Tab), nunca preguntas abiertas. Solo usa texto libre cuando la respuesta no pueda enumerarse (ej. número de ticket).
 
 ## Checklist final
 
-Confirma: develop_ts integradas → feature pusheado y QA validó → develop con todos los features → release existe → master con merge del release → tag anotado (`-a`) → push de `develop master <tag>` juntos → usuario en `develop`.
+**Todas las opciones (A/B/C/D):**
+- [ ] `develop_ts<NUM>` integradas al feature
+- [ ] Feature pusheado y QA validó en sandbox
+
+**Solo C/D (producción):**
+- [ ] `develop` tiene todos los features del release
+- [ ] `release_<X.Y.Z>` existe
+- [ ] `master` tiene el merge del release
+- [ ] Tag anotado (`-a`) con mensaje descriptivo
+- [ ] Push de `develop`, `master` y tag juntos
+- [ ] Usuario en `develop`
