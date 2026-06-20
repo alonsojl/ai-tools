@@ -1,4 +1,4 @@
-# alonsojl-marketplace
+# ia-marketplace
 
 A personal [Claude Code](https://claude.com/claude-code) plugin marketplace providing agents and skills for Go development and git workflows.
 
@@ -7,19 +7,19 @@ A personal [Claude Code](https://claude.com/claude-code) plugin marketplace prov
 Add the marketplace (from a local checkout):
 
 ```bash
-/plugin marketplace add ./alonsojl-marketplace
+/plugin marketplace add ./ia-marketplace
 ```
 
 Validate the marketplace definition:
 
 ```bash
-claude plugin validate ./alonsojl-marketplace
+claude plugin validate ./ia-marketplace
 ```
 
 Then install any of the plugins below:
 
 ```bash
-/plugin install <plugin-name>@alonsojl-marketplace
+/plugin install <plugin-name>@ia-marketplace
 ```
 
 ## Plugins
@@ -47,7 +47,7 @@ Provides 40+ Go-focused skills (code style, naming, concurrency, testing, error 
 `go-builder` (in `golang-engineering`) preloads skills from the other two plugins via its `skills:` frontmatter. For those preloads to resolve, install/enable `git-tools` and `cc-skills-golang` alongside `golang-engineering`:
 
 ```bash
-/plugin install golang-engineering@alonsojl-marketplace
-/plugin install git-tools@alonsojl-marketplace
-/plugin install cc-skills-golang@alonsojl-marketplace
+/plugin install golang-engineering@ia-marketplace
+/plugin install git-tools@ia-marketplace
+/plugin install cc-skills-golang@ia-marketplace
 ```

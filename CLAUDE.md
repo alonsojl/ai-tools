@@ -10,22 +10,18 @@ This repo hosts `marketplace`, a personal Claude Code plugin marketplace (`.clau
 
 ```
 marketplace/
-├── .claude-plugin/marketplace.json   # catalog of all plugins in this marketplace
+├── .claude-plugin/marketplace.json
 └── plugins/
-    ├── golang-engineering/           # Go-specific agents/skills (local source)
+    ├── golang-engineering/
     │   ├── .claude-plugin/plugin.json
-    │   ├── agents/go-builder.md
-    │   └── skills/                   # currently empty
-    └── git-tools/                    # general-purpose git workflow skills (local source)
+    │   └── agents/go-builder.md
+    └── git-tools/
         ├── .claude-plugin/plugin.json
         └── skills/
             ├── git-commit/SKILL.md
             └── git-flow/
-                ├── SKILL.md          # team Gitflow release preparation (in Spanish)
-                └── references/
-                    ├── hotfix.md
-                    ├── rollback.md
-                    └── examples.md
+                ├── SKILL.md
+                └── references/hotfix.md
 ```
 
 A third catalog entry, `cc-skills-golang`, is **not vendored** — it points to the external repo `samber/cc-skills-golang` via a GitHub source (`{"source": "github", "repo": "samber/cc-skills-golang"}`), with no pinned `version`, so every new upstream commit is treated as an update.
@@ -41,17 +37,15 @@ When adding a new local plugin, create `plugins/<name>/.claude-plugin/plugin.jso
 
 ## Vendoring vs. linking external skills
 
-When pulling in a skill from another repo, choose based on what it is:
-
-- **Standalone skill file** (e.g. `git-tools/skills/git-commit/SKILL.md`, copied from `github/awesome-copilot`): vendor it — copy the `SKILL.md` (and any `references/`) verbatim into `plugins/<plugin>/skills/<skill-name>/`. Simple, robust, no upstream dependency.
-- **Skill that's part of a maintained multi-skill plugin with cross-references** (e.g. `cc-skills-golang`, which has 40+ interlinked skills like `golang-naming`, `golang-lint`, `golang-structs-interfaces`): reference the whole upstream plugin via a `github` source in `marketplace.json` rather than vendoring a single skill — vendoring just one loses the cross-referenced skills and upstream improvements.
+- **Standalone skill file** (e.g. `git-commit/SKILL.md`): vendor it — copy the `SKILL.md` (and any `references/`) into `plugins/<plugin>/skills/<skill-name>/`.
+- **Skill that's part of a maintained multi-skill plugin with cross-references** (e.g. `cc-skills-golang`): reference the whole upstream plugin via a `github` source in `marketplace.json` rather than vendoring a single skill.
 
 ## Agent design conventions
 
-- **Separate build vs. review roles**: `golang-engineering` follows a pattern of a read-write "builder" agent (`go-builder`) that implements + commits, kept distinct from a (planned, currently empty) read-only "reviewer" agent — so review isn't biased by the agent that wrote the code, and the reviewer can be reused on any diff.
-- **`skills:` frontmatter preloads content**: listing a skill under an agent's `skills:` field injects that `SKILL.md`'s full content into the agent's context at startup (e.g. `go-builder` preloads `git-commit` and `golang-code-style`). This is independent of which plugin defines the skill — it searches all skills available in the session — but the providing plugin (e.g. `git-tools`, `cc-skills-golang`) must be installed/enabled alongside `golang-engineering` for the preload to resolve.
-- **`model: opus`** (alias, not a pinned version like `claude-opus-4-8`) is used so the agent automatically tracks the latest Opus release.
-- **`isolation: worktree`** is used for agents that commit (like `go-builder`): the agent runs in a separate git worktree/branch, leaving the main working tree untouched; the worktree is cleaned up automatically if no changes are made, otherwise its path/branch are returned for review and merge.
+- **Separate build vs. review roles**: `golang-engineering` follows a pattern of a read-write "builder" agent (`go-builder`) distinct from a read-only "reviewer" agent.
+- **`skills:` frontmatter preloads content**: listing a skill under an agent's `skills:` field injects that `SKILL.md`'s full content into the agent's context at startup. The providing plugin must be installed/enabled for the preload to resolve.
+- **`model: opus`** (alias) is used so the agent automatically tracks the latest Opus release.
+- **`isolation: worktree`** is used for agents that commit: the agent runs in a separate git worktree/branch, leaving the main working tree untouched.
 
 ## Testing changes to this marketplace
 
