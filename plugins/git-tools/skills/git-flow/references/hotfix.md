@@ -1,92 +1,91 @@
-# Flujo de Hotfix
+# Hotfix Flow
 
-Usa este flujo cuando hay que resolver un incidente que ya está en producción y no se puede esperar al siguiente ciclo normal de release. **Variante del equipo: el hotfix sale de `develop`, no de `master`** (a diferencia del Gitflow clásico). Una vez resuelto, se integra de vuelta a `develop` y desde ahí se crea la rama `release_<X.Y.Z>` para seguir con el flujo de integración conocido.
+Use this flow to resolve a production incident that can't wait for the next regular release cycle. **Team variant: hotfix branches from `develop`, not `master`** (unlike classic Gitflow). Once resolved, it merges back into `develop` and follows the standard release flow from there.
 
-## Paso H0 — Validaciones previas
+## Step H0 — Pre-validation
 
-Mismas validaciones que la sección "Validación inicial" del flujo principal (repo correcto, sin cambios sin commitear, remotos alcanzables). Además confirma con el usuario:
+Same validations as the main flow (correct repo, clean working tree, reachable remotes). Also confirm with the user:
 
-- **Descripción corta del incidente** — se usa en el mensaje del tag al final.
+- **Short description of the incident** — used in the tag message.
 
-Obtén el tag actual (la versión en producción donde surgió el problema):
+Get the current tag (the production version where the issue occurred):
 
 ```bash
 git tag -l --sort=-v:refname | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$' | head -1
 ```
 
-La rama hotfix usa **el tag actual** (la versión con el problema). El siguiente patch se usa después para el release. Ejemplo: si el tag actual es `1.0.1`, la rama es `hotfix_1.0.1` y el release será `1.0.2`.
+The hotfix branch uses **the current tag** (the version with the issue). The next patch is used later for the release. Example: if the current tag is `1.0.1`, the branch is `hotfix_1.0.1` and the release will be `1.0.2`.
 
-## Paso H1 — Crear rama hotfix desde develop
+## Step H1 — Create hotfix branch from develop
 
-La rama sale de `develop` actualizado, pero se nombra con el tag actual:
+The branch is created from updated `develop`, but named after the current tag:
 
 ```bash
 git checkout develop
 git pull origin develop
-git checkout -b hotfix_<TAG_ACTUAL>
+git checkout -b hotfix_<CURRENT_TAG>
 ```
 
-## Paso H2 — Resolver la incidencia
+## Step H2 — Fix the issue
 
-El usuario edita y commitea en la rama `hotfix_<X.Y.Z>`. Acompaña con los comandos, no apliques cambios de código por él:
+The user edits and commits on the `hotfix_<X.Y.Z>` branch. Assist with commands, don't make code changes for them:
 
 ```bash
-git add <archivos>
-git commit -m "fix: <descripción corta del incidente>"
+git add <files>
+git commit -m "fix: <short incident description>"
 ```
 
-Antes de seguir, confirma que la solución fue probada localmente.
+Confirm the fix was tested locally before proceeding.
 
-## Paso H3 — Mergear hotfix de vuelta a develop
+## Step H3 — Merge hotfix back into develop
 
 ```bash
 git checkout develop
-git merge --no-ff hotfix_<TAG_ACTUAL>
+git merge --no-ff hotfix_<CURRENT_TAG>
 ```
 
-No hagas push de `develop` todavía.
+Don't push `develop` yet.
 
-## Paso H4 — Crear release desde develop y continuar el flujo normal
+## Step H4 — Create release from develop and follow normal flow
 
-El release usa el **siguiente patch** (tag actual + 1). A partir de aquí el flujo es idéntico a los pasos 6–8 del flujo principal:
+The release uses the **next patch** (current tag + 1). From here, the flow is identical to steps 5–7 of the main workflow:
 
 ```bash
-git checkout -b release_<SIGUIENTE_PATCH>
+git checkout -b release_<NEXT_PATCH>
 
 git checkout master
 git pull origin master
-git merge --no-ff release_<SIGUIENTE_PATCH>
+git merge --no-ff release_<NEXT_PATCH>
 
-git tag -a <SIGUIENTE_PATCH> -m "Merge branch 'release_<SIGUIENTE_PATCH>'"
-git push origin develop master <SIGUIENTE_PATCH>
+git tag -a <NEXT_PATCH> -m "Merge branch 'release_<NEXT_PATCH>'"
+git push origin develop master <NEXT_PATCH>
 
 git checkout develop
 ```
 
-El mensaje del tag sigue el mismo formato que un release normal: `"Merge branch 'release_<X.Y.Z>'"`.
+The tag message follows the same format as a normal release: `"Merge branch 'release_<X.Y.Z>'"`.
 
-
-## Ejemplo completo — tag actual 1.0.1, bug de validación de login
+## Full Example — current tag 1.0.1, login validation bug
 
 ```bash
 # H0
 git status --porcelain
-git tag -l --sort=-v:refname | head -1     # → 1.0.1 (versión con el problema)
+git tag -l --sort=-v:refname | head -1     # → 1.0.1 (version with the issue)
 
-# H1 — rama hotfix con el tag actual
+# H1 — hotfix branch named after current tag
 git checkout develop
 git pull origin develop
 git checkout -b hotfix_1.0.1
 
-# H2 (el usuario edita y commitea)
+# H2 (user edits and commits)
 git add src/auth/login.js
-git commit -m "fix: validación de login fallaba con emails en mayúsculas"
+git commit -m "fix: login validation failed with uppercase emails"
 
 # H3
 git checkout develop
 git merge --no-ff hotfix_1.0.1
 
-# H4 — release con el siguiente patch (1.0.2)
+# H4 — release with next patch (1.0.2)
 git checkout -b release_1.0.2
 
 git checkout master
