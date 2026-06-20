@@ -8,7 +8,7 @@ allowed-tools: Bash
 
 ## Overview
 
-Prepara ramas para liberar tickets a desarrollo, sandbox y producción siguiendo el flujo Gitflow del equipo. Todos los merges usan `--no-ff`. Ejecuta paso a paso, pidiendo confirmación antes de cada comando que modifique el repo o los remotos.
+Prepara ramas para liberar tickets a desarrollo, sandbox y producción siguiendo el flujo Gitflow del equipo. Todos los merges usan `--no-ff`.
 
 ## Convenciones de ramas
 
@@ -21,37 +21,35 @@ Prepara ramas para liberar tickets a desarrollo, sandbox y producción siguiendo
 | `release_<X.Y.Z>` | Release |
 | `hotfix_<X.Y.Z>` | Hotfix — sale de `develop`, se nombra con el tag actual (versión con el problema) |
 
-## Workflow
+## Detección automática
 
-### 1. Tipo de preparación
-
-Pregunta al usuario con opciones seleccionables:
-
-| Opción | Develop branches | Alcance |
-|--------|-----------------|---------|
-| `[A — Feature único a sandbox]` | Una `develop_ts` | Pasos 2–4 (feature + push) |
-| `[B — Feature multi-ticket a sandbox]` | Varias `develop_ts` | Pasos 2–4 (feature + push) |
-| `[C — Feature único a producción]` | Una `develop_ts` | Pasos 2–8 (hasta master + tag) |
-| `[D — Feature multi-ticket a producción]` | Varias `develop_ts` | Pasos 2–8 (hasta master + tag) |
-
-Después obtén del usuario:
-
-- **Ticket(s)** a liberar (`ts176`, o `ts176 + ts177` para B/D)
-- **Versión** del release (solo C/D — si no la da, propón en el paso 6)
-
-### 2. Validar estado del repo
+Cuando el usuario diga "prepara esta rama" (o similar), detecta el tipo de rama actual:
 
 ```bash
-git rev-parse --show-toplevel
-git remote -v
-git status --porcelain
-git fetch --all --prune
-git branch -a | grep develop_ts<NUM>
+git branch --show-current
 ```
 
-Si algo falla, **detente** y avisa al usuario.
+| Rama actual | Tipo detectado |
+|-------------|----------------|
+| `develop_ts<NUM>` | develop |
+| `feature_ts<NUM>` | feature |
+| `hotfix_<X.Y.Z>` | hotfix |
 
-### 3. Crear feature desde develop
+Según el tipo detectado, pregunta al usuario con opciones seleccionables **hasta dónde preparar**:
+
+| Opción | Destino | Pasos |
+|--------|---------|-------|
+| `[Sandbox]` | Feature → push (QA valida, se despliega a sandbox) | develop_ts: 1–3 / feature_ts: 2–3 |
+| `[Producción]` | Todo hasta master + tag | develop_ts: 1–7 / feature_ts: 2–7 |
+
+**Si es `hotfix`:**
+No preguntar — siempre va hasta producción. Lee `references/hotfix.md` y ejecuta desde H3.
+
+**Después de la selección, ejecuta todos los pasos sin preguntar más.** Solo detente si hay un conflicto de merge.
+
+## Workflow
+
+### 1. Crear feature desde develop
 
 ```bash
 git checkout develop
@@ -61,18 +59,23 @@ git checkout -b feature_ts<NUM>
 
 Multi-ticket: usa `feature_ts<NUM1>_ts<NUM2>` en el orden que indique el usuario.
 
-### 4. Integrar develop_ts al feature y pushear
+### 2. Integrar develop_ts al feature
 
 ```bash
 git merge --no-ff develop_ts<NUM>
+```
+
+Multi-ticket: mergea cada `develop_ts<NUM>` correspondiente.
+
+### 3. Push del feature (deploy a sandbox)
+
+```bash
 git push origin feature_ts<NUM>
 ```
 
-Multi-ticket (B/D): mergea cada `develop_ts<NUM>` antes del push. **Pausa hasta que QA valide en sandbox.**
+Si el alcance es **hasta sandbox**, el flujo termina aquí.
 
-Opciones A/B: el flujo termina aquí. Opciones C/D: continúa al paso 5.
-
-### 5. Mergear feature(s) a develop (solo C/D)
+### 4. Mergear feature(s) a develop
 
 ```bash
 git checkout develop
@@ -81,27 +84,18 @@ git merge --no-ff feature_ts<NUM>
 
 No hagas push de `develop` todavía.
 
-### 6. Crear release (solo C/D)
+### 5. Crear release
 
-Obtén el último tag para calcular la siguiente versión:
+Obtén el último tag y calcula el siguiente patch automáticamente:
 
 ```bash
 git tag -l --sort=-v:refname | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$' | head -1
-```
-
-Regla de incremento (confirma con el usuario antes de crear la rama):
-
-| Último tag | Tipo | Siguiente versión |
-|------------|------|-------------------|
-| `1.0.0` | patch (por defecto) | `1.0.1` |
-| `1.0.0` | minor (funcionalidad nueva) | `1.1.0` |
-| `1.0.0` | major (breaking changes) | `2.0.0` |
-
-```bash
 git checkout -b release_<X.Y.Z>
 ```
 
-### 7. Mergear release a master (solo C/D)
+Usa **patch** por defecto (`1.0.0` → `1.0.1`).
+
+### 6. Mergear release a master
 
 ```bash
 git checkout master
@@ -109,7 +103,7 @@ git pull origin master
 git merge --no-ff release_<X.Y.Z>
 ```
 
-### 8. Tag y push (solo C/D)
+### 7. Tag y push
 
 ```bash
 git tag -a <X.Y.Z> -m "Merge branch 'release_<X.Y.Z>'"
@@ -129,20 +123,16 @@ Lee el archivo correspondiente solo cuando lo necesites:
 
 - **Hotfix**: `references/hotfix.md`
 
-## Interacción con el usuario
-
-Presenta decisiones como **opciones seleccionables** (Tab), nunca preguntas abiertas. Solo usa texto libre cuando la respuesta no pueda enumerarse (ej. número de ticket).
-
 ## Checklist final
 
-**Todas las opciones (A/B/C/D):**
+**Hasta sandbox:**
 - [ ] `develop_ts<NUM>` integradas al feature
-- [ ] Feature pusheado y QA validó en sandbox
+- [ ] Feature pusheado
 
-**Solo C/D (producción):**
+**Hasta producción:**
 - [ ] `develop` tiene todos los features del release
 - [ ] `release_<X.Y.Z>` existe
 - [ ] `master` tiene el merge del release
-- [ ] Tag anotado (`-a`) con mensaje descriptivo
+- [ ] Tag anotado (`-a`) con mensaje `"Merge branch 'release_<X.Y.Z>'"`
 - [ ] Push de `develop`, `master` y tag juntos
 - [ ] Usuario en `develop`
