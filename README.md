@@ -4,7 +4,13 @@ A personal [Claude Code](https://claude.com/claude-code) plugin marketplace prov
 
 ## Installation
 
-Add the marketplace (from a local checkout):
+Add the marketplace from GitHub:
+
+```bash
+/plugin marketplace add alonsojl/ai-tools
+```
+
+Or from a local checkout:
 
 ```bash
 /plugin marketplace add ./ai-tools
