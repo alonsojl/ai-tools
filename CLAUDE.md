@@ -4,12 +4,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Repository purpose
 
-This repo hosts `marketplace`, a personal Claude Code plugin marketplace (`.claude-plugin/marketplace.json`). It catalogs plugins that bundle agents and skills for distribution via `/plugin marketplace add` and `/plugin install`.
+This repo hosts `ai-tools`, a personal Claude Code plugin marketplace (`.claude-plugin/marketplace.json`). It catalogs plugins that bundle agents and skills for distribution via `/plugin marketplace add` and `/plugin install`.
 
 ## Structure
 
 ```
-marketplace/
+ai-tools/
 ├── .claude-plugin/marketplace.json
 └── plugins/
     ├── golang-engineering/
@@ -50,7 +50,7 @@ When adding a new local plugin, create `plugins/<name>/.claude-plugin/plugin.jso
 ## Testing changes to this marketplace
 
 ```bash
-claude plugin validate ./marketplace
-/plugin marketplace add ./marketplace
-/plugin install <plugin-name>@marketplace
+claude plugin validate ./ai-tools
+/plugin marketplace add ./ai-tools
+/plugin install <plugin-name>@ai-tools
 ```
