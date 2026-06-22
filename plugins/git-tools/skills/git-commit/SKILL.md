@@ -121,4 +121,5 @@ EOF
 - NEVER run destructive commands (--force, hard reset) without explicit request
 - NEVER skip hooks (--no-verify) unless user asks
 - NEVER force push to main/master
+- NEVER add a `Co-Authored-By: Claude ...` trailer (or any Claude/AI attribution) to commit messages
 - If commit fails due to hooks, fix and create NEW commit (don't amend)
