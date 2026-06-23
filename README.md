@@ -28,6 +28,25 @@ Then install any of the plugins below:
 /plugin install <plugin-name>@ai-tools
 ```
 
+### Updating
+
+When a plugin version changes, refresh the marketplace catalog and update the
+installed plugin:
+
+```bash
+/plugin marketplace update ai-tools
+/plugin update <plugin-name>@ai-tools
+```
+
+Then reload so the session picks up the changes:
+
+```bash
+/reload-plugins
+```
+
+The external `cc-skills-golang` plugin is unversioned (tracks upstream commits),
+so `/plugin marketplace update ai-tools` alone pulls its latest changes.
+
 ## Plugins
 
 ### golang-engineering
