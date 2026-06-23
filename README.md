@@ -34,7 +34,7 @@ Then install any of the plugins below:
 
 Agents and skills for Go software engineering: code review, testing, concurrency, and language conventions.
 
-- **`go-builder`** agent — implements Go code changes (writes/edits code, runs `go build`/`go vet`/`go test`/lint), then commits the result following Conventional Commits. Runs in an isolated git worktree (`isolation: worktree`) so the main working tree stays untouched. Preloads the `git-commit` and `golang-code-style` skills.
+- **`golang-engineer`** agent — implements Go code changes (writes/edits code, runs `go build`/`go vet`/`go test`/lint), then commits the result following Conventional Commits. Runs in an isolated git worktree (`isolation: worktree`) so the main working tree stays untouched. Preloads the `git-commit` and `golang-code-style` skills.
 
 ### git-tools
 
@@ -46,11 +46,11 @@ Skills for git workflows: conventional commits and related tooling.
 
 External plugin from [samber/cc-skills-golang](https://github.com/samber/cc-skills-golang) — referenced directly via a GitHub source (not vendored), so it tracks upstream commits automatically.
 
-Provides 40+ Go-focused skills (code style, naming, concurrency, testing, error handling, design patterns, popular libraries, and more). `go-builder` preloads the `golang-code-style` skill from this plugin.
+Provides 40+ Go-focused skills (code style, naming, concurrency, testing, error handling, design patterns, popular libraries, and more). `golang-engineer` preloads the `golang-code-style` skill from this plugin.
 
 ## Plugin dependencies
 
-`go-builder` (in `golang-engineering`) preloads skills from the other two plugins via its `skills:` frontmatter. For those preloads to resolve, install/enable `git-tools` and `cc-skills-golang` alongside `golang-engineering`:
+`golang-engineer` (in `golang-engineering`) preloads skills from the other two plugins via its `skills:` frontmatter. For those preloads to resolve, install/enable `git-tools` and `cc-skills-golang` alongside `golang-engineering`:
 
 ```bash
 /plugin install golang-engineering@ai-tools

@@ -1,5 +1,5 @@
 ---
-name: go-builder
+name: golang-engineer
 description: Implements Go code changes - writes/edits code, runs build/tests/lint, and commits the result. Use when asked to implement a Go feature, fix, or refactor that should be committed when finished.
 model: opus
 isolation: worktree

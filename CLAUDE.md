@@ -14,7 +14,7 @@ ai-tools/
 └── plugins/
     ├── golang-engineering/
     │   ├── .claude-plugin/plugin.json
-    │   └── agents/go-builder.md
+    │   └── agents/golang-engineer.md
     └── git-tools/
         ├── .claude-plugin/plugin.json
         └── skills/
@@ -42,7 +42,7 @@ When adding a new local plugin, create `plugins/<name>/.claude-plugin/plugin.jso
 
 ## Agent design conventions
 
-- **Separate build vs. review roles**: `golang-engineering` follows a pattern of a read-write "builder" agent (`go-builder`) distinct from a read-only "reviewer" agent.
+- **Separate build vs. review roles**: `golang-engineering` follows a pattern of a read-write implementation agent (`golang-engineer`) distinct from a read-only reviewer agent.
 - **`skills:` frontmatter preloads content**: listing a skill under an agent's `skills:` field injects that `SKILL.md`'s full content into the agent's context at startup. The providing plugin must be installed/enabled for the preload to resolve.
 - **`model: opus`** (alias) is used so the agent automatically tracks the latest Opus release.
 - **`isolation: worktree`** is used for agents that commit: the agent runs in a separate git worktree/branch, leaving the main working tree untouched.
